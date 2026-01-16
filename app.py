@@ -1,64 +1,64 @@
 import streamlit as st
 
-# 1. CONFIGURATION DE BASE
+# 1. FORCE LE NOM ET L'ICÔNE DANS LE NAVIGATEUR
 st.set_page_config(
-    page_title="FINANCEMENT PRO", 
+    page_title="EXPERT FINANCEMENT", 
     page_icon="💰", 
     layout="centered"
 )
 
-# 2. INJECTION POUR FORCER CHROME (Le "Forceur")
-# Ce code change le titre de l'onglet et l'icône pour que Chrome ne les confonde plus
-st.markdown(f"""
-    <script>
-        var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-        link.type = 'image/x-icon';
-        link.rel = 'shortcut icon';
-        link.href = 'https://cdn-icons-png.flaticon.com/512/2845/2845874.png';
-        document.getElementsByTagName('head')[0].appendChild(link);
-        window.parent.document.title = "FINANCEMENT PRO";
-    </script>
-    """, unsafe_allow_html=True)
-
-# 3. STYLE VISUEL PERSONNALISÉ
+# 2. LE BRISEUR DE CACHE (Script pour forcer Android à oublier "Streamlit")
 st.markdown("""
+    <script>
+        // Change le titre que Chrome utilise pour l'icône
+        window.parent.document.title = "EXPERT FINANCES";
+        
+        // Supprime les anciens réglages de l'application dans le navigateur
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+          });
+        }
+    </script>
     <style>
-    /* Change la couleur de la barre du haut pour la différencier */
-    header[data-testid="stHeader"] {
-        background-color: #002b36;
-    }
-    .main {
-        background-color: #f8f9fa;
-    }
+        /* Change la couleur de la barre du haut pour prouver que c'est une nouvelle version */
+        header[data-testid="stHeader"] {
+            background-color: #1a1a1a !important;
+        }
+        .main {
+            background-color: #f0f2f6;
+        }
     </style>
     """, unsafe_allow_html=True)
 
-# 4. CONTENU DE L'APPLICATION
-st.title("🏦 Simulateur Expert")
+# 3. TON APPLICATION PRO
+st.title("🏦 SimuPro Expert")
 st.write("---")
 
+# Formulaire
 with st.container():
     col1, col2 = st.columns(2)
     with col1:
-        montant = st.number_input("Montant (€)", value=25000, step=1000)
-        duree = st.slider("Durée (ans)", 1, 30, 15)
+        montant = st.number_input("Montant (€)", value=15000, step=1000)
+        duree = st.slider("Durée (années)", 1, 30, 10)
     with col2:
-        taux = st.number_input("Taux d'intérêt (%)", value=3.5, step=0.1)
-        assurance = st.number_input("Assurance (%)", value=0.35, step=0.05)
-        age = st.number_input("Âge actuel", 18, 80, 35)
+        taux = st.number_input("Taux (%)", value=3.5, step=0.1)
+        assurance = st.number_input("Assurance (%)", value=0.30, step=0.05)
+        age = st.number_input("Âge du client", 18, 85, 30)
 
-# Calculs
+# Calculs simples
 duree_m = duree * 12
-t_mensuel = (taux / 100) / 12
-mensu_hors_ass = (montant * t_mensuel) / (1 - (1 + t_mensuel)**(-duree_m)) if taux > 0 else montant/duree_m
-mensu_ass = (montant * (assurance / 100)) / 12
-mensu_totale = mensu_hors_ass + mensu_ass
-
-# Affichage des résultats
-st.divider()
-st.metric("Mensualité Totale", f"{mensu_totale:,.2f} €")
-
-if age + duree > 75:
-    st.error(f"⚠️ Risque : Fin de prêt à {age + duree} ans.")
+t_m = (taux / 100) / 12
+if taux > 0:
+    m_hors = (montant * t_m) / (1 - (1 + t_m)**(-duree_m))
 else:
-    st.success(f"Âge fin de prêt : {age + duree} ans.")
+    m_hors = montant / duree_m
+m_ass = (montant * (assurance / 100)) / 12
+m_totale = m_hors + m_ass
+
+# Affichage
+st.divider()
+st.metric("Mensualité Totale", f"{m_totale:,.2f} €")
+st.info(f"Fin de prêt à : {age + duree} ans")
